@@ -1,0 +1,23 @@
+# Database
+db/silvia.db
+
+# Output
+output/
+
+# Logs
+logs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Models (downloaded at runtime)
+*.bin
+*.onnx
