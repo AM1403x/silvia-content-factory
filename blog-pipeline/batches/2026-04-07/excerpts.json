@@ -1,0 +1,32 @@
+{
+  "01-deadline-day-jitters.html": {
+    "excerpt": "The Dow fell 85 points while the S&P and Russell 2000 rose. When indices diverge like this, it's not a rally. It's a rotation.",
+    "categories": "markets,deep-dive",
+    "published_at": "2026-04-07T17:00:00Z"
+  },
+  "02-williams-watchful-waiting.html": {
+    "excerpt": "NY Fed President John Williams just signaled 'watchful waiting.' Here's what every phrase in the speech means for the April 29 FOMC decision.",
+    "categories": "macro,fed,explainer",
+    "published_at": "2026-04-07T18:00:00Z"
+  },
+  "03-earnings-kickoff-playbook.html": {
+    "excerpt": "Delta reports Wednesday, CPI drops Thursday, banks hit next Tuesday. Three catalyst days in four sessions. Your positioning guide is here.",
+    "categories": "earnings,preview,markets",
+    "published_at": "2026-04-07T19:00:00Z"
+  },
+  "04-consumer-credit.html": {
+    "excerpt": "February revolving credit grew just 0.6% annualized. When credit card spending slows this hard, a Q2 retail earnings miss is already in motion.",
+    "categories": "macro,consumer,scenario",
+    "published_at": "2026-04-07T20:00:00Z"
+  },
+  "05-tesla-jpm-warning.html": {
+    "excerpt": "JPMorgan just published a note warning Tesla could fall 60%. When a tier-1 bank puts that in writing, it's not a headline. It's a signal.",
+    "categories": "ticker-analysis,tech",
+    "published_at": "2026-04-07T21:00:00Z"
+  },
+  "06-energy-ceasefire-cliff.html": {
+    "excerpt": "XOM, CVX, and OXY are priced for war, not peace. A ceasefire this week gaps oil to $94 and these stocks with it. Here's how to stress test.",
+    "categories": "scenario,energy,ticker-analysis",
+    "published_at": "2026-04-07T22:00:00Z"
+  }
+}

@@ -132,3 +132,106 @@ python3 -c "from checks.compliance_scan import compliance_scan; print(compliance
 # Test SVG rendering
 python3 -c "from viz.render import render_svg_to_png_sync; render_svg_to_png_sync('<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" fill=\"blue\"/></svg>', '/tmp/test.png', 100, 100); print('OK')"
 ```
+
+## Blog Article Production (MUST READ before publishing)
+
+The full pipeline lives at `blog-pipeline/`. **Read `blog-pipeline/RULES.md` before writing or publishing any article.**
+
+### Required reading order
+1. `blog-pipeline/RULES.md` — hard rules, banned phrases, canonical strings (read first, every time)
+2. `blog-pipeline/README.md` — golden path workflow, script-by-script
+3. `BLOG_ARTICLE_CHECKLIST.md` — extended checklist with examples
+
+### Hard rules (as of April 6, 2026)
+
+**Every article MUST include:**
+1. `<h1>` title with the key number or insight
+2. 3-5 `<h2>` sections
+3. 1-2 HTML `<table>` blocks with `<thead>` and `<tbody>`
+4. `<h2>Frequently Asked Questions</h2>` with 3-5 `<h3>` Q&As
+5. `<h2>Sources</h2>` with at least 3 linked `<li>` entries
+6. CTA paragraph BEFORE the Sources section
+7. Disclaimer paragraph at the very end (canonical text below)
+8. 900-1,500 words
+
+**Every article MUST NOT include:**
+1. **NO chart images / SVGs / data visualizations.** Removed entirely from the pipeline. Caused too many visual quality issues. Do NOT add `<img>`, `<svg>`, or `<figure>` tags.
+2. **NO `<!DOCTYPE>`, `<html>`, `<head>`, `<style>`, `<script>`, `<meta>`, `<link>`, `<title>`, `<body>` wrapper tags.** Sanity dumps `<style>` content as paragraph text.
+3. **NO metadata strip lines** like `<p><strong>April 4, 2026</strong> | How-To</p>` after the `<h1>`.
+4. **NO em dashes** (—). Use commas or periods.
+5. **NO exclamation marks**, **NO emojis**, **NO hashtags**.
+6. **NO banned AI words:** delve, robust, leverage, pivotal, nuanced, catalyst, holistic, comprehensive, multifaceted, encompassing, testament, transformative, streamline, furthermore, moreover, additionally.
+7. **NO scene-setting openers** like "In today's market..." or "As investors digest...".
+8. **NO summary paragraphs** like "In summary..." or "Overall...".
+
+### Banned phrases (never include in any article or disclaimer)
+- "Consult a qualified professional before making financial decisions"
+- "Consult a qualified professional" (any variant)
+- "Always consult a qualified"
+
+These were removed from the blog disclaimer template and the author page on April 6, 2026. The canonical disclaimer is the 3-sentence version below — no fourth sentence.
+
+### Canonical strings (use exactly these — no variations)
+
+**CTA** (placed BEFORE the Sources section):
+```html
+<p>What does this mean for your portfolio? <a href="https://cfosilvia.com">Ask Silvia</a>.</p>
+```
+
+**Disclaimer** (placed at the very end):
+```html
+<p><em>This content is for informational purposes only. It is not financial, investment, or legal advice. Past performance does not guarantee future results.</em></p>
+```
+
+### Pipeline workflow (always follow this sequence)
+
+```bash
+# 1. Generate articles (text + tables only, NO charts)
+#    Output: ~/blog-batches/YYYY-MM-DD/*.html
+#    Required alongside: ~/blog-batches/YYYY-MM-DD/excerpts.json
+
+# 2. Clean HTML (strips wrappers, leaked CSS, metadata lines, banned phrases, leftover img/svg/figure)
+python3 blog-pipeline/scripts/02-clean-html.py ~/blog-batches/YYYY-MM-DD/
+
+# 3. Reorder CTA before Sources, append canonical disclaimer
+python3 blog-pipeline/scripts/03-fix-structure.py ~/blog-batches/YYYY-MM-DD/
+
+# 4. Run automated checklist verification (FAILS on any banned content)
+bash blog-pipeline/scripts/04-verify.sh ~/blog-batches/YYYY-MM-DD/
+
+# 5. Publish to Sanity with custom short excerpts from excerpts.json
+python3 blog-pipeline/scripts/05-publish.py ~/blog-batches/YYYY-MM-DD/
+
+# 6. Audit Sanity for structural issues, banned phrases, duplicate excerpts
+python3 blog-pipeline/scripts/06-audit-sanity.py
+```
+
+### Lessons baked in (every one of these is a real bug we hit)
+
+| Bug | Where it's now prevented |
+|---|---|
+| SVGs in HTML get dumped as paragraph text | `02-clean-html.py` strips `<svg>`, `<figure>` |
+| `<!DOCTYPE>`, `<style>`, `<head>` content leaks as paragraphs | `02-clean-html.py` strips all wrapper tags |
+| First `<p>` with `April X, 2026 \| Category` becomes the SEO excerpt | `02-clean-html.py` detects and strips metadata strip lines |
+| Default excerpt = first paragraph verbatim → duplicates on rendered page | `05-publish.py` requires `excerpts.json` with custom short excerpts |
+| CTA hidden after Sources list (nobody scrolls there) | `03-fix-structure.py` enforces CTA-before-Sources ordering |
+| "Consult a qualified professional" disclaimer phrase | `02-clean-html.py` strips it; `06-audit-sanity.py` flags it |
+| Banned AI words (catalyst, leverage, unprecedented, etc.) | `04-verify.sh` runs the audit; humanizer agent enforces voice rules |
+| Sanity CDN AVIF conversion destroys chart text | Charts removed entirely; no longer relevant |
+| Same PNG filename on re-upload caches old version | Charts removed entirely; no longer relevant |
+| Vercel CSP blocks `cdn.sanity.io` images | Already fixed in `Silvia-Web/middleware.ts` — don't remove |
+| Vercel staging needs Sanity read token | `SANITY_STAGING_WRITE_TOKEN` set in Vercel preview env — don't remove |
+
+### Excerpts.json format (REQUIRED for every batch)
+
+```json
+{
+  "01-article-slug.html": {
+    "excerpt": "100-150 char summary, NOT identical to the first paragraph",
+    "categories": "macro,jobs,fed",
+    "published_at": "2026-04-08T09:00:00Z"
+  }
+}
+```
+
+The publisher (`05-publish.py`) refuses to run without this file.
